@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="CloseWindow.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="WindowCaption" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Sponsored session</Value>
+    </Setting>
+    <Setting Name="IntervalMsec" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">250</Value>
+    </Setting>
+    <Setting Name="CloseMethod" Type="System.String" Scope="User">
+      <Value Profile="(Default)">SendReturn</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
