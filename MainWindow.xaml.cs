@@ -13,14 +13,17 @@ namespace CloseWindow
     /// </summary>
     public partial class MainWindow : Window
     {
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool IsWindowVisible(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         static extern int GetWindowText(IntPtr hWnd, StringBuilder lpWindowText, int nMaxCount);
 
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         static extern bool EnumDesktopWindows(IntPtr hDesktop, EnumDelegate lpEnumCallbackFunction, IntPtr lParam);
 
         // Define the callback delegate's type.
@@ -37,8 +40,8 @@ namespace CloseWindow
         void CloseWindow(IntPtr hwnd) { SendMessage(hwnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero); }
 
         readonly DispatcherTimer timer = new DispatcherTimer();
-
-        static readonly Dictionary<IntPtr, string> allVisibleWindows = new Dictionary<IntPtr, string>();
+        static readonly StringBuilder sb = new StringBuilder(1024);
+        static readonly Dictionary<IntPtr, Tuple<string,string>> allVisibleWindows = new Dictionary<IntPtr, Tuple<string,string>>();
 
         public MainWindow()
         {
@@ -53,7 +56,8 @@ namespace CloseWindow
             allVisibleWindows.Clear();
             EnumDesktopWindows(IntPtr.Zero, FilterCallback, IntPtr.Zero);
             foreach (var wnd in allVisibleWindows)
-                if (wnd.Value.IndexOf(Properties.Settings.Default.WindowCaption, StringComparison.OrdinalIgnoreCase) >= 0)
+                if (wnd.Value.Item1.IndexOf(Properties.Settings.Default.WindowCaption, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    wnd.Value.Item1.IndexOf(Properties.Settings.Default.WindowClass, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     if (Properties.Settings.Default.CloseMethod.Equals("SendReturn"))
                     {
@@ -66,13 +70,15 @@ namespace CloseWindow
 
         private static bool FilterCallback(IntPtr hWnd, int lParam)
         {
-            StringBuilder sb_title = new StringBuilder(1024);
-            GetWindowText(hWnd, sb_title, sb_title.Capacity);
-            string title = sb_title.ToString();
+            GetWindowText(hWnd, sb, sb.Capacity);
+            string title = sb.ToString();
+            GetClassName(hWnd, sb, sb.Capacity);
+            string className = sb.ToString();
 
-            if (IsWindowVisible(hWnd) && !string.IsNullOrEmpty(title))
-                allVisibleWindows[hWnd] = title;
-
+            if (IsWindowVisible(hWnd) && !(string.IsNullOrEmpty(title) || string.IsNullOrEmpty(className)))
+            {
+                allVisibleWindows[hWnd] = new Tuple<string, string>(title, className);
+            }
             return true;
         }
     }

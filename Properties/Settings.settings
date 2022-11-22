@@ -9,7 +9,10 @@
       <Value Profile="(Default)">250</Value>
     </Setting>
     <Setting Name="CloseMethod" Type="System.String" Scope="User">
-      <Value Profile="(Default)">SendReturn</Value>
+      <Value Profile="(Default)">Close</Value>
+    </Setting>
+    <Setting Name="WindowClass" Type="System.String" Scope="User">
+      <Value Profile="(Default)">myclass</Value>
     </Setting>
   </Settings>
 </SettingsFile>
